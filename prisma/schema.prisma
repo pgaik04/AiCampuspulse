@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Assessment {
+  id            String     @id @default(cuid())
+  title         String
+  slug          String     @unique
+  category      String
+  description   String
+  durationMin   Int
+  passingScore  Int
+  difficulty    String
+  icon           String
+  createdAt     DateTime   @default(now())
+  questions     Question[]
+  results       Result[]
+}
+
+model Question {
+  id           String     @id @default(cuid())
+  assessmentId String
+  text         String
+  options      Json
+  correctIndex Int
+  skill        String
+  explanation  String?
+  order        Int
+  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  @@index([assessmentId, order])
+}
+
+model Result {
+  id             String     @id @default(cuid())
+  assessmentId   String
+  userName       String     @default("Student")
+  score          Int
+  timeTakenSec   Int
+  status         String
+  completedAt    DateTime   @default(now())
+  answers        Json
+  assessment     Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  @@index([assessmentId, completedAt])
+}
